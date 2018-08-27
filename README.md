@@ -5,7 +5,7 @@ ERC20 tokens between Ethereum and Loom DAppChains via a browser frontend built w
 
 ## Interface in action
 
-![](https://uc93063baa261a64b48cbf0e575d.previews.dropboxusercontent.com/p/orig/AALmkbwdJEDsdwYEK1E1DX1zKiDhg9HN-n8zY9oZ-mOlUFSCYJZ37ltmBo1utinYg3XtPZ4g0zvIpaefNdy2VRRIm9Y3x6aXfHeCdg6ggC-2SDk2N5gysLh_qzC9mPuHPxZPCJY31YBU4kckfR4MsF5ZfY9lM_tm6NcJgppJiTRs6ItSlsNUs7MAJDkm5lfLlj5rdZv4rQTtOe4hqhtvB4im/p.gif?size=2048x1536&size_mode=3)
+![](https://uc348d71394e7eb6263b22d38ccb.previews.dropboxusercontent.com/p/orig/AAKPvjgnGhOcy-e53PADMffBK9BC_N_Yy6RHC80V3EbhOfKF6see8hO4uzCE07EKwHruLfY8pbHS19a2_FZuXeNOF9rOvPLLCtGMT5Kcvk9xQjcmr_HqbxwtzQEp4z39W5e1qFns-KX3iACtXJSwWR1sEI-Kqp-SenAb6LEEDODvu68RhLuiUgtv25DblzhmK82Qs3vshmRITN0Nz9qBXhZL/p.gif?size=2048x1536&size_mode=3)
 
 ## Quick Start
 
