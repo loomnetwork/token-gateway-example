@@ -1,8 +1,8 @@
 pragma solidity ^0.4.24;
 
 import "openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
-import "openzeppelin-solidity/contracts/token/ERC720/ERC20Receiver.sol";
 import "./ERC20DAppToken.sol";
+import "./ERC20Receiver.sol";
 
 /**
  * @title Full ERC20 Token for Loom DAppChains
@@ -20,7 +20,7 @@ contract GameTokenDappChain is ERC20DAppToken, StandardToken, ERC20Receiver {
   /**
     * @dev Constructor function
     */
-  constructor(address _gateway) public {
+  constructor (address _gateway) public {
     gateway = _gateway;
     totalSupply_ = INITIAL_SUPPLY * (10 ** uint256(decimals));
     balances[_gateway] = totalSupply_;
@@ -37,6 +37,6 @@ contract GameTokenDappChain is ERC20DAppToken, StandardToken, ERC20Receiver {
     address _from,
     uint256 amount
   ) public returns(bytes4) {
-    return ERC20;
+    return ERC20_RECEIVED;
   }
 }

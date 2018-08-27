@@ -1,7 +1,7 @@
-# Cards Gateway Example
+# Token Gateway Example
 
 This project is built using the [loom-js][] Transfer Gateway API, and demonstrates how to transfer
-ERC721 tokens between Ethereum and Loom DAppChains via a browser frontend built with React.
+ERC20 tokens between Ethereum and Loom DAppChains via a browser frontend built with React.
 
 ## Interface in action
 
@@ -11,10 +11,10 @@ ERC721 tokens between Ethereum and Loom DAppChains via a browser frontend built 
 
 ### Requirements
 
-* node >= 8
-* wget (used to download Loom DAppChain binary)
-* nc (used to check required ports aren't in use)
-* [MetaMask][] browser extension
+- node >= 8
+- wget (used to download Loom DAppChain binary)
+- nc (used to check required ports aren't in use)
+- [MetaMask][] browser extension
 
 ### Install
 
@@ -73,24 +73,22 @@ You will also need to [import the private key](https://consensys.zendesk.com/hc/
 
 #### Troubleshooting
 
-* If you stop the example and start it up again you may encounter a MetaMask error like this:
-> "rpc error with payload {…nonce. account has nonce of: 0 tx has nonce of: 5"
+- If you stop the example and start it up again you may encounter a MetaMask error like this:
+  > "rpc error with payload {…nonce. account has nonce of: 0 tx has nonce of: 5"
 
 > This happens because MetaMask keeps track of the last nonce that was used to send a transaction with
 > a particular account, and when all the chains are reset the nonce needs to be reset back to zero.
 > You can force MetaMask to reset the nonce by [reseting the imported account](https://consensys.zendesk.com/hc/en-us/articles/360004177531-Resetting-an-Account-New-UI-).
 
-* Restart the entire service can help to clean cache also `./transfer_gateway restart`, after restart you should clean MetaMask cache.
+- Restart the entire service can help to clean cache also `./transfer_gateway restart`, after restart you should clean MetaMask cache.
 
-* Sometimes when run `./transfer_gateway start` and a message like `Ganache port 8545 is already in use` appears it's because the service `ganache` is running (obvious), however if you never ran `./transfer_gateway start` then it's because another agent started `ganache` and this example starts it self `ganache` version.
+- Sometimes when run `./transfer_gateway start` and a message like `Ganache port 8545 is already in use` appears it's because the service `ganache` is running (obvious), however if you never ran `./transfer_gateway start` then it's because another agent started `ganache` and this example starts it self `ganache` version.
 
-* In order to `stop all` services (used by cards-gateway-example) you should run `./transfer_gateway stop`, however if services like `ganache` or `webpack` didn't halt then you need to stop then by the process id or `pid`.
-
-
+- In order to `stop all` services (used by token-gateway-example) you should run `./transfer_gateway stop`, however if services like `ganache` or `webpack` didn't halt then you need to stop then by the process id or `pid`.
 
 ## Example "in a nutshell"
 
-The `cards-gateway-example` directory contains five sub directories:
+The `token-gateway-example` directory contains five sub directories:
 
 ```bash
 ├── dappchain
@@ -124,7 +122,7 @@ but we'll highlight some of the settings here that are relevant to this example.
 
 ```yaml
 # This is a unique identifier for the DAppChain used in this example
-ChainID: "default"
+ChainID: 'default'
 # This enables the latest version of the contract registry maintained by the DAppChain, which is
 # required in order for the Transfer Gateway to be able verify DAppChain contract ownership.
 # This setting must not be changed after the DAppChain starts for the first time!
@@ -133,26 +131,26 @@ RegistryVersion: 2
 TransferGateway:
   # Enables the Gateway Go contract (DAppChain Gateway), must be the same on all nodes.
   ContractEnabled: true
-  
+
   # Enables the in-process Gateway Oracle.
   OracleEnabled: true
 
   # Address of the Ganache network where the Mainnet Solidity contracts are deployed
   # (take a look at the truffle-ethereum directory).
-  EthereumURI: "http://127.0.0.1:8545"
+  EthereumURI: 'http://127.0.0.1:8545'
 
   # Address of the Mainnet Gateway contract deployed to the Ganache network above.
-  MainnetContractHexAddress: "0xf5cad0db6415a71a5bc67403c87b56b629b4ddaa"
+  MainnetContractHexAddress: '0xf5cad0db6415a71a5bc67403c87b56b629b4ddaa'
 
   # Private key that will be used by the Gateway Oracle to sign pending withdrawals.
-  MainnetPrivateKeyPath: "oracle_eth_priv.key"
+  MainnetPrivateKeyPath: 'oracle_eth_priv.key'
 
   # Private key that will be used by the Gateway Oracle to send txs to the DAppChain Gateway.
-  DAppChainPrivateKeyPath: "oracle_priv.key"
+  DAppChainPrivateKeyPath: 'oracle_priv.key'
 
   # Address of DAppChain node the Gateway Oracle should interact with.
-  DAppChainReadURI: "http://localhost:46658/query"
-  DAppChainWriteURI: "http://localhost:46658/rpc"
+  DAppChainReadURI: 'http://localhost:46658/query'
+  DAppChainWriteURI: 'http://localhost:46658/rpc'
 
   # These control how frequently the Gateway Oracle will poll the DAppChain and Ganache.
   DAppChainPollInterval: 1 # seconds
@@ -161,7 +159,7 @@ TransferGateway:
   # Number of seconds to wait before starting the Gateway Oracle, this allows the DAppChain node
   # to spin up before the Gateway Oracle tries to connect to it.
   OracleStartupDelay: 5
-  
+
   # Number of seconds the Gateway Oracle should wait between reconnection attempts if it encounters
   # a network error of some kind.
   OracleReconnectInterval: 5
@@ -217,18 +215,18 @@ data between the DAppChain and Mainnet.
 ### 📁 truffle-ethereum
 
 This directory contains the contracts that are deployed to Mainnet, primarily the `Gateway` contract
-(Mainnet Gateway), and the `CryptoCards` ERC721 token contract.
+(Mainnet Gateway), and the `GameToken` ERC20 token contract.
 
-The `CryptoCards` ERC721 contract implements a convenient function for depositing tokens into the
+The `GameToken` ERC20 contract implements a convenient function for depositing tokens into the
 `Gateway` contract:
 
 ```solidity
-function depositToGateway(uint tokenId) public {
-  safeTransferFrom(msg.sender, gateway, tokenId);
+function depositToGateway(uint amount) public {
+  safeTransferFrom(msg.sender, gateway, amount);
 }
 ```
 
-The `Gateway` contract implements the `withdrawERC721` function, which should be called by a user
+The `Gateway` contract implements the `withdrawERC20` function, which should be called by a user
 who wishes to withdraw a token from the Mainnet Gateway back to their own Mainnet account.
 
 > NOTE: The Mainnet Gateway will only allow a user to withdraw a token if they can provide proof
@@ -236,14 +234,14 @@ who wishes to withdraw a token from the Mainnet Gateway back to their own Mainne
 
 ### 📁 truffle-dappchain
 
-This directory contains the `CryptoCardsDAppChain` ERC721 contract that's deployed to the DAppChain,
-this contract will keep track of any tokens sent from the `CryptoCards` ERC721 contract on Mainnet
+This directory contains the `GameTokenDAppChain` ERC20 contract that's deployed to the DAppChain,
+this contract will keep track of any tokens sent from the `GameToken` ERC20 contract on Mainnet
 to the DAppChain via the Transfer Gateway.
 
-When a user deposits their `CryptoCards` tokens into the Mainnet Gateway contract the DAppChain
-Gateway contract will `mint` the corresponding tokens in the `CryptoCardsDAppChain` contract.
+When a user deposits their `GameToken` tokens into the Mainnet Gateway contract the DAppChain
+Gateway contract will `mint` the corresponding tokens in the `GameTokenDAppChain` contract.
 
-Note that the DAppChain Gateway must be authorized to mint tokens in the `CryptoCardsDAppChain`
+Note that the DAppChain Gateway must be authorized to mint tokens in the `GameTokenDAppChain`
 contract, otherwise token transfers from Mainnet to the DAppChain won't work.
 
 ```solidity
@@ -256,9 +254,9 @@ function mint(uint256 _uid) public {
 ### 📁 transfer-gateway-scripts
 
 This directory contains a single `index.js` script file which is responsible for mapping the
-`CryptoCards` ERC721 contract on Mainnet to the `CryptoCardsDAppChain` ERC721 contract on the
+`GameToken` ERC20 contract on Mainnet to the `GameTokenDAppChain` ERC20 contract on the
 DAppChain. Without this contract mapping the Transfer Gateway won't know what to do when it receives
-ERC721 tokens from either contract. You can read more about contract mapping in the
+ERC20 tokens from either contract. You can read more about contract mapping in the
 [Transfer Gateway docs][].
 
 ### 📁 webclient
@@ -268,28 +266,26 @@ browser (Chrome / Firefox). The web frontend can be reached at `http://localhost
 the `./transfer_gateway start`.
 
 The frontend consists of four pages:
+
 - `Home` - where you must map your Mainnet account to a DAppChain account by signing a message via
-          `MetaMask` with your Mainnet account. This must be done before attempting to transfer
-           any cards.
-- `Owned Cards` - where you can see the cards currently owned by you on Mainnet (yeah we just
-                      gave 5 cards to you 😉).
-- `Cards on Gateway` - where you can see the cards in the Mainnet Gateway that are waiting to be
-                      withdrawn by you to your Mainnet account.
-- `Cards on DAppChain` - where you can see the cards that have been transfered to the DAppChain from
-                        your Mainnet account.
+  `MetaMask` with your Mainnet account. This must be done before attempting to transfer
+  any tokens.
+- `Ethereum Account` - where you can see the tokens currently owned by you on Mainnet (yeah we just
+  gave 5 tokens to you 😉).
+- `Ethereum Gateway` - where you can see the tokens in the Mainnet Gateway that are waiting to be
+  withdrawn by you to your Mainnet account.
+- `DAppChain Account` - where you can see the tokens that have been transferred to the DAppChain from
+  your Mainnet account.
 
+## Loom Network
 
-Loom Network
-----
 [https://loomx.io](https://loomx.io)
 
-
-License
-----
+## License
 
 BSD 3-Clause License
 
 [loom-js]: https://github.com/loomnetwork/loom-js
-[MetaMask]: https://metamask.io/
-[Built-in Contracts docs]: https://loomx.io/developers/docs/en/builtin.html
-[Transfer Gateway docs]: https://loomx.io/developers/docs/en/transfer-gateway.html
+[metamask]: https://metamask.io/
+[built-in contracts docs]: https://loomx.io/developers/docs/en/builtin.html
+[transfer gateway docs]: https://loomx.io/developers/docs/en/transfer-gateway.html

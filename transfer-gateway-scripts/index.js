@@ -14,9 +14,9 @@ const {
   soliditySha3
 } = require('loom-js')
 
-const coinAddress = readFileSync('../coin_address', 'utf-8')
-const coinDAppChainAddress = readFileSync('../coin_dappchain_address', 'utf-8')
-const coinTx = readFileSync('../coin_tx_hash', 'utf-8')
+const coinAddress = readFileSync('../game_token_address', 'utf-8')
+const coinDAppChainAddress = readFileSync('../game_token_dappchain_address', 'utf-8')
+const coinTx = readFileSync('../game_token_tx_hash', 'utf-8')
 ;(async () => {
   const privateKey = CryptoUtils.B64ToUint8Array(readFileSync('../dappchain/private_key', 'utf-8'))
   const publicKey = CryptoUtils.publicKeyFromPrivateKey(privateKey)

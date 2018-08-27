@@ -4,14 +4,14 @@ import { BrowserRouter as Router, Route, Link } from 'react-router-dom'
 
 import Main from './components/main'
 import Home from './components/home'
-import EthCards from './components/eth_cards'
-import DAppChainCards from './components/dappchain_cards'
-import GatewayCards from './components/gateway_cards'
+import EthTokens from './components/eth_tokens'
+import DAppChainTokens from './components/dappchain_tokens'
+import GatewayTokens from './components/gateway_tokens'
 import EthAccountManager from './eth_managers/eth_account_manager'
-import EthCardManager from './eth_managers/eth_card_manager'
+import EthTokenManager from './eth_managers/eth_token_manager'
 import EthGatewayManager from './eth_managers/eth_gateway_manager'
 import DAppChainAccountManager from './dc_managers/dc_account_manager'
-import DAppChainCardManager from './dc_managers/dc_card_manager'
+import DAppChainTokenManager from './dc_managers/dc_token_manager'
 import DAppChainGatewayManager from './dc_managers/dc_gateway_manager'
 ;(async () => {
   console.log('Loading ...')
@@ -20,13 +20,13 @@ import DAppChainGatewayManager from './dc_managers/dc_gateway_manager'
       console.log(
         '\n\n----> If this takes too long to start, please try to reset MetaMask cache :)'
       ),
-    5000
+    10000
   )
 
-  const ethCardManager = await EthCardManager.createAsync()
+  const ethTokenManager = await EthTokenManager.createAsync()
   const ethAccountManager = await EthAccountManager.createAsync()
   const dcAccountManager = await DAppChainAccountManager.createAsync()
-  const dcCardManager = await DAppChainCardManager.createAsync()
+  const dcTokenManager = await DAppChainTokenManager.createAsync()
   const ethGatewayManager = await EthGatewayManager.createAsync()
   const dcGatewayManager = await DAppChainGatewayManager.createAsync()
 
@@ -35,48 +35,48 @@ import DAppChainGatewayManager from './dc_managers/dc_gateway_manager'
   const BuildMain = () => (
     <Main
       ethAccountManager={ethAccountManager}
-      ethCardManager={ethCardManager}
+      ethTokenManager={ethTokenManager}
       dcAccountManager={dcAccountManager}
-      dcCardManager={dcCardManager}
+      dcTokenManager={dcTokenManager}
     />
   )
 
   const BuildHome = () => (
     <Home
       ethAccountManager={ethAccountManager}
-      ethCardManager={ethCardManager}
+      ethTokenManager={ethTokenManager}
       dcAccountManager={dcAccountManager}
-      dcCardManager={dcCardManager}
+      dcTokenManager={dcTokenManager}
     />
   )
 
-  const BuildEthCards = () => (
-    <EthCards
+  const BuildEthTokens = () => (
+    <EthTokens
       ethAccountManager={ethAccountManager}
-      ethCardManager={ethCardManager}
+      ethTokenManager={ethTokenManager}
       dcAccountManager={dcAccountManager}
-      dcCardManager={dcCardManager}
+      dcTokenManager={dcTokenManager}
     />
   )
 
-  const BuildGatewayCards = () => (
-    <GatewayCards
+  const BuildGatewayTokens = () => (
+    <GatewayTokens
       ethAccountManager={ethAccountManager}
       ethGatewayManager={ethGatewayManager}
-      ethCardManager={ethCardManager}
+      ethTokenManager={ethTokenManager}
       dcAccountManager={dcAccountManager}
-      dcCardManager={dcCardManager}
+      dcTokenManager={dcTokenManager}
       dcGatewayManager={dcGatewayManager}
     />
   )
 
-  const BuildDAppChainCards = () => (
-    <DAppChainCards
+  const BuildDAppChainTokens = () => (
+    <DAppChainTokens
       ethAccountManager={ethAccountManager}
-      ethCardManager={ethCardManager}
+      ethTokenManager={ethTokenManager}
       ethGatewayManager={ethGatewayManager}
       dcAccountManager={dcAccountManager}
-      dcCardManager={dcCardManager}
+      dcTokenManager={dcTokenManager}
       dcGatewayManager={dcGatewayManager}
     />
   )
@@ -91,9 +91,9 @@ import DAppChainGatewayManager from './dc_managers/dc_gateway_manager'
         <main role="main" style={{ marginTop: 100 }}>
           <div className="container">
             <Route exact path="/" component={BuildHome} />
-            <Route path="/eth_cards" component={BuildEthCards} />
-            <Route path="/gateway_cards" component={BuildGatewayCards} />
-            <Route path="/dappchain_cards" component={BuildDAppChainCards} />
+            <Route path="/eth_tokens" component={BuildEthTokens} />
+            <Route path="/gateway_tokens" component={BuildGatewayTokens} />
+            <Route path="/dappchain_tokens" component={BuildDAppChainTokens} />
           </div>
         </main>
       </div>

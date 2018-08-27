@@ -1,15 +1,15 @@
 import React from 'react'
-import Card from './card'
 import { CryptoUtils } from 'loom-js'
+import Wallet from './wallet'
 
-export default class EthCards extends React.Component {
+export default class GatewayTokens extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
       ethAccount: '0x',
       account: '0x',
-      cardIds: [],
       mapping: null,
+      balance: 0,
       withdrawing: false
     }
   }
@@ -24,29 +24,29 @@ export default class EthCards extends React.Component {
     const account = this.props.dcAccountManager.getCurrentAccount()
     const data = await this.props.dcGatewayManager.withdrawalReceiptAsync(account)
 
-    let cardIds = []
+    let balance
     if (data) {
-      cardIds = [data.value.toNumber()]
+      balance = +data.value.toString(10)
     }
 
-    this.setState({ account, cardIds, mapping })
+    this.setState({ account, mapping, balance })
   }
 
-  async withdrawFromGateway(cardId) {
+  async withdrawFromGateway(amount) {
     this.setState({ withdrawing: true })
     const data = await this.props.dcGatewayManager.withdrawalReceiptAsync(this.state.account)
     const tokenOwner = data.tokenOwner.local.toString()
     const signature = CryptoUtils.bytesToHexAddr(data.oracleSignature)
 
     try {
-      await this.props.ethGatewayManager.withdrawCardAsync(
+      await this.props.ethGatewayManager.withdrawTokenAsync(
         tokenOwner,
-        cardId,
+        amount,
         signature,
-        this.props.ethCardManager.getContractAddress()
+        this.props.ethTokenManager.getContractAddress()
       )
 
-      alert('Card withdraw with success, check Owned Cards')
+      alert('Token withdraw with success, check Owned Tokens')
     } catch (err) {
       console.error(err)
     }
@@ -56,32 +56,26 @@ export default class EthCards extends React.Component {
   }
 
   render() {
-    const cards = this.state.cardIds.map((cardId, idx) => {
-      const cardDef = this.props.ethCardManager.getCardWithId(cardId)
-
-      return (
-        <Card
-          title={cardDef.title}
-          description={cardDef.description}
-          key={idx}
-          disabled={this.state.withdrawing}
-          action="Withdraw from gateway"
-          handleOnClick={() => this.withdrawFromGateway(cardId)}
-        />
-      )
-    })
+    const wallet = (
+      <Wallet
+        balance={this.state.balance}
+        action="Withdraw from gateway"
+        handleOnClick={() => this.withdrawFromGateway(this.state.balance)}
+        disabled={this.state.sending}
+      />
+    )
 
     const view = !this.state.mapping ? (
       <p>Please sign your user first</p>
-    ) : cards.length > 0 ? (
-      cards
+    ) : this.state.balance > 0 ? (
+      wallet
     ) : (
-      <p>No cards deposited on Gateway yet</p>
+      <p>No balance deposited on Gateway yet</p>
     )
 
     return (
       <div>
-        <h2>Ethereum Network Gateway Cards</h2>
+        <h2>Ethereum Network Gateway Tokens</h2>
         <div className="container">
           <div>{view}</div>
         </div>
