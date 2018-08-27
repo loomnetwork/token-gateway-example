@@ -1,0 +1,16 @@
+{
+  "scripts": {
+    "compile": "truffle compile",
+    "deploy": "rm -rf build; truffle migrate --reset --network development",
+    "ganache-cli": "ganache-cli -p 8545 -m gravity top burden flip student usage spell purchase hundred improve check genre",
+    "ganache-cli:dev": "scripts/ganache-cli.sh"
+  },
+  "dependencies": {
+    "ganache-cli": "^6.1.6",
+    "loom-truffle-provider": "^0.5.0",
+    "openzeppelin-solidity": "1.10.0",
+    "truffle": "^4.1.13",
+    "truffle-hdwallet-provider": "^0.0.6",
+    "truffle-privatekey-provider": "^0.1.0"
+  }
+}

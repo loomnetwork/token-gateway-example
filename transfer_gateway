@@ -1,0 +1,313 @@
+#!/bin/bash
+
+# Ports used
+ganache_port=8545
+dapp_port=8080
+dappchain_port_1=46657
+dappchain_port_2=46658
+build_number=404
+
+# Check available platforms
+platform='unknown'
+unamestr=`uname`
+if [[ "$unamestr" == 'Linux' ]]; then
+  platform='linux'
+elif [[ "$unamestr" == 'Darwin' ]]; then
+  platform='osx'
+else
+  echo "Platform not supported on this script yet"
+  exit -1
+fi
+
+function check_file_exists {
+  if [ -f $1 ]; then
+    echo 1
+  else
+    echo 0
+  fi
+}
+
+function check_directory_exists {
+  if [ -d $1 ]; then
+    echo 1
+  else
+    echo 0
+  fi
+}
+
+function check_port {
+  if (nc -z localhost $1); then
+    echo 1
+  else
+    echo 0
+  fi
+}
+
+function is_setup_already {
+  if [ $(check_directory_exists truffle-ethereum/node_modules) = 1 ] &&
+     [ $(check_directory_exists truffle-dappchain/node_modules) = 1 ] &&
+     [ $(check_file_exists dappchain/loom) = 1 ] &&
+     [ $(check_directory_exists webclient/node_modules) = 1 ] &&
+     [ $(check_directory_exists transfer-gateway-scripts/node_modules) = 1 ]; then
+    echo 1
+  else
+    echo 0
+  fi
+}
+
+# Setup function does the first work of download node_packages and loom binary
+function setup {
+  cd webclient
+  echo "Install Webclient"
+  yarn
+  cd ../truffle-dappchain
+  echo "Install DappChain"
+  yarn
+  cd ../truffle-ethereum
+  echo "Install Truffle Ethereum"
+  yarn
+  cd ../transfer-gateway-scripts
+  echo "Install Transfer Gateway Scripts"
+  yarn
+  cd ../dappchain
+  echo "Install DappChain"
+  wget "https://private.delegatecall.com/loom/$platform/build-$build_number/loom"
+  chmod +x loom
+  ./loom init -f
+  sleep 5
+  cp genesis.example.json genesis.json
+  cd ..
+}
+
+function start_and_deploy_truffle_ethereum {
+  if [ $(check_file_exists truffle-ethereum/ganache.pid) = 0 ]; then
+    echo "Start and Deploy Truffle Ethereum"
+    cd truffle-ethereum
+    yarn ganache-cli:dev > /dev/null 2>&1
+    sleep 5
+    yarn deploy > /dev/null 2>&1
+    cd ..
+  else
+    echo "Truffle Ethereum is deployed and running"
+  fi
+}
+
+function stop_truffle_ethereum {
+  if [ $(check_file_exists truffle-ethereum/ganache.pid) = 1 ]; then
+    echo "Stop Truffle Ethereum"
+    cd truffle-ethereum
+    pid=$(cat ganache.pid)
+    kill -9 $pid
+    rm ganache.pid
+    cd ..
+  else
+    echo "Truffle Ethereum not running"
+  fi
+}
+
+function start_dappchain {
+  if [ $(check_file_exists dappchain/loom.pid) = 0 ]; then
+    echo "Start DAppChain"
+    cd dappchain
+    ./loom reset; ./loom run > /dev/null 2>&1 &
+    loom_pid=$!
+    echo $loom_pid > loom.pid
+    sleep 10
+    cd ..
+  else
+    echo "DAppChain is running"
+  fi
+}
+
+function stop_dappchain {
+  if [ $(check_file_exists dappchain/loom.pid) = 1 ]; then
+    echo "Stop DAppChain"
+    cd dappchain
+    pid=$(cat loom.pid)
+    kill -9 $pid
+    rm loom.pid
+    cd ..
+  else
+    echo "DAppChain not running"
+  fi
+}
+
+function deploy_truffle_dappchain {
+  if [ $(check_file_exists webclient/webclient.pid) = 0 ]; then
+    echo "Start Truffle DAppChain"
+    cd truffle-dappchain
+    yarn deploy > /dev/null 2>&1 &
+    cd ..
+    sleep 20
+  else
+    echo "Truffle DAppChain is deployed"
+  fi
+}
+
+# Mapping is necessary to "mirroring" the token on mainnet and dappchain
+function run_mapping {
+  echo "Running mapping"
+  cd transfer-gateway-scripts
+  node index.js > /dev/null 2>&1 &
+  cd ..
+}
+
+function start_webapp {
+  if [ $(check_file_exists webclient/webclient.pid) = 0 ]; then
+    echo "Running DApp"
+    cd webclient
+    yarn serve > /dev/null 2>&1 &
+    sleep 5
+    cd ..
+  else
+    echo "Dapp is running"
+  fi
+}
+
+function stop_webdapp {
+  if [ $(check_file_exists webclient/webclient.pid) = 1 ]; then
+    echo "Stop DApp"
+    cd webclient
+    pid=$(cat webclient.pid)
+    kill -9 $pid
+    rm webclient.pid
+    cd ..
+  else
+    echo "DApp not running"
+  fi
+}
+
+case "$1" in
+setup)
+  echo "------------------------------------------------------------------------------------------"
+  echo "Installing necessary packages, this can take up to 3 minutes (depending on internet speed)"
+  echo "------------------------------------------------------------------------------------------"
+  echo
+
+  if [ $(is_setup_already) = 1 ]; then
+    echo "Setup already ran"
+    exit -1
+  fi
+
+  setup
+
+  echo
+  echo "-------------------------------------"
+  echo "Done, packages installed with success"
+  echo "-------------------------------------"
+
+  ;;
+status)
+  echo "-----------------"
+  echo "Services statuses"
+  echo "-----------------"
+  echo
+
+  [[ $(check_file_exists truffle-ethereum/ganache.pid) = 1 ]] && echo "Ganache running" || echo "Ganache stopped"
+  [[ $(check_file_exists dappchain/loom.pid) = 1 ]] && echo "Loomchain running" || echo "Loomchain stopped"
+  [[ $(check_file_exists webclient/webclient.pid) = 1 ]] && echo "Webclient running" || echo "Webclient stopped"
+
+  echo
+
+  ;;
+start)
+  echo "-------------------------------------------------------------------"
+  echo "Initializing background services, it can take take (40 seconds) ..."
+  echo "-------------------------------------------------------------------"
+  echo
+
+  if [ $(is_setup_already) = 0 ]; then
+    echo "Please use the setup command first: ./transfer_gateway setup"
+    echo
+    exit -1
+  fi
+
+  if [ $(check_port $ganache_port) != 0 ]; then
+    echo "Ganache port $ganache_port is already in use"
+    echo
+    exit -1
+  fi
+
+  if [ $(check_port $dapp_port) != 0 ]; then
+    echo "Dapp port $dapp_port is already in use"
+    echo
+    exit -1
+  fi
+
+  if [ $(check_port $dappchain_port_1) != 0 ] || [ $(check_port $dappchain_port_2) != 0 ]; then
+    echo "Some port from DAppChain already in use [$dappchain_port_1 or $dappchain_port_2]"
+    echo
+    exit -1
+  fi
+
+  start_and_deploy_truffle_ethereum
+  start_dappchain
+  deploy_truffle_dappchain
+  start_webapp
+  run_mapping
+
+  echo
+  echo "-----------------------------------------------------------"
+  echo "Services initialized and ready, check http://localhost:8080"
+  echo "-----------------------------------------------------------"
+
+  ;;
+stop)
+  echo "-----------------"
+  echo "Stopping services"
+  echo "-----------------"
+  echo
+
+  stop_webdapp
+  stop_dappchain
+  stop_truffle_ethereum
+
+  echo
+  echo "----------------"
+  echo "Services stopped"
+  echo "----------------"
+
+  ;;
+restart)
+  $0 stop
+  $0 start
+
+  ;;
+cleanup)
+  echo "-----------------------------------------"
+  echo "Cleaning packages and binaries downloaded"
+  echo "-----------------------------------------"
+  echo
+
+  echo "Cleaning DAppChain"
+  rm -rf dappchain/loom
+  rm -rf dappchain/genesis.json
+  rm -rf dappchain/app.db
+  rm -rf dappchain/chaindata
+  rm -rf dappchain/loom.pid
+
+  echo "Cleaning Transfer Gateway Scripts"
+  rm -rf transfer-gateway-scripts/node_modules
+
+  echo "Cleaning Truffle DAppChain"
+  rm -rf truffle-dappchain/node_modules
+  rm -rf truffle-dappchain/build
+
+  echo "Cleaning Truffle Ethereum"
+  rm -rf truffle-ethereum/node_modules
+  rm -rf truffle-ethereum/build
+
+  echo "Cleaning DApp"
+  rm -rf webclient/node_modules
+
+  echo
+  echo "-----"
+  echo "Clear"
+  echo "-----"
+
+  ;;
+*)
+   echo "Usage: $0 {setup|start|status|stop|restart|cleanup}"
+esac
+
+exit 0
