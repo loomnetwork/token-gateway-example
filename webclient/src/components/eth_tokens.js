@@ -53,7 +53,7 @@ export default class EthTokens extends React.Component {
     ) : this.state.balance > 0 ? (
       wallet
     ) : (
-      <p>No balance deposited on Gateway yet</p>
+      <p>No tokens available</p>
     )
 
     return (
