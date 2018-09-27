@@ -1,3 +1,8 @@
+THIS REPO IS OUTDATED, PLEASE MOVE TO https://github.com/loomnetwork/transfer-gateway-example FOR THE UP TO DATE VERSION OF LOOM'S TRANSFER GATEWAY EXAMPLE
+
+
+---
+
 # Token Gateway Example
 
 This project is built using the [loom-js][] Transfer Gateway API, and demonstrates how to transfer
